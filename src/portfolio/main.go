@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -10,15 +11,17 @@ func main() {
 	mux := http.NewServeMux()
 	files := http.FileServer(http.Dir("public"))
 	mux.Handle("/static/", http.StripPrefix("/static/", files))
+	images := http.FileServer(http.Dir("images"))
+	mux.Handle("/images/", http.StripPrefix("/images/", images))
 	mux.HandleFunc("/", home)
 	server := &http.Server{
-		Addr:    "127.0.0.1:8080",
+		Addr:    ":" + os.Getenv("PORT"),
 		Handler: mux,
 	}
 	server.ListenAndServe()
 }
 
-func home(w http.ResponseWriter, r *http.Request){
-	t, _ := template.ParseFiles("index.html")
+func home(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("index.html"))
 	t.Execute(w, nil)
 }
